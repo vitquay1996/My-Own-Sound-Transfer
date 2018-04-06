@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MyOwnSoundTranfer.iml" filepath="$PROJECT_DIR$/MyOwnSoundTranfer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/My-Own-Sound-Transfer.iml" filepath="$PROJECT_DIR$/My-Own-Sound-Transfer.iml" />
+      <module fileurl="file://D:\CS3218\My-Own-Sound-Transfer\MyOwnSoundTranfer.iml" filepath="D:\CS3218\My-Own-Sound-Transfer\MyOwnSoundTranfer.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

@@ -1,22 +1,17 @@
 package com.example.vitquay.myownsoundtranfer
 
 import android.app.Activity
-import android.os.Bundle
-import android.media.AudioTrack
-import android.media.AudioFormat.ENCODING_PCM_16BIT
-import android.media.AudioFormat.CHANNEL_OUT_STEREO
-import android.media.AudioManager
-import android.media.AudioFormat.CHANNEL_OUT_STEREO
-import android.media.AudioFormat.ENCODING_PCM_16BIT
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFormat
+import android.media.AudioTrack
 import android.media.audiofx.LoudnessEnhancer
+import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
-import kotlin.math.abs
 
 
 class MainActivity : Activity() {
@@ -31,6 +26,9 @@ class MainActivity : Activity() {
             enhancer.setEnabled(true)
             tone.play()
             Toast.makeText(this, "Button pressed", Toast.LENGTH_LONG).show()
+        }
+        receiverButton.setOnClickListener {
+            startActivity(Intent(this, ReceiverActivity::class.java))
         }
     }
 
