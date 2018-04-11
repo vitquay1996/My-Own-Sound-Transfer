@@ -12,6 +12,7 @@ import android.widget.Toast
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+import kotlin.math.abs
 
 
 class MainActivity : Activity() {
@@ -20,7 +21,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         button.setOnClickListener {
-            val tone = generateTone(450.0, 1000)
+            val tone = generateTone("abc", 5)
             val enhancer = LoudnessEnhancer(tone.getAudioSessionId())
             enhancer.setTargetGain(10000)
             enhancer.setEnabled(true)
@@ -32,36 +33,67 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun generateTone(freqHz: Double, durationMs: Int): AudioTrack {
-        val count = (44100.0 * (durationMs / 1000.0)).toInt()
+    private fun generateTone(text: String, durationS: Int): AudioTrack {
+        val count = (44100.0 * durationS).toInt()
         val samples = DoubleArray(count)
-        var i = 0
+        val samples2 = DoubleArray(count)
+        val samples3 = DoubleArray(count)
 
-        // For testing with pre-generated sine
-//        while (i < count) {
-//            val sample = (Math.sin(2.0 * Math.PI * i.toDouble() / (44100.0 / freqHz)) * 0x7FFF)
-//            samples[i] = sample
-//            i += 1
-//        }
+        var i = 2
 
+         //For testing with pre-generated sine
         while (i < count) {
-            if (i/2 == 450 || i/2 == 500) {
-                samples[i] = 0.0
-                samples[i + 1] = 9000000.0
-            } else {
-                samples[i] = 0.0
-                samples[i+1] = 0.0
-            }
-            i += 2
+            var sample = Math.cos(2.0 * Math.PI * i.toDouble() / (44100.0 / 2000)) * 0x7FFF
+            samples[i] = sample / 1.0
+            i += 1
         }
-        val fftDo = DoubleFFT_1D(44100)
-        val buffer = ShortArray(44100)
 
+        i = 0
+        while (i < count) {
+            var sample = Math.cos(2.0 * Math.PI * i.toDouble() / (44100.0 / 2181)) * 0x7FFF
+            samples2[i] = sample / 1.0
+            i += 1
+        }
+        i = 0
+        while (i < count) {
+            var sample = Math.cos(2.0 * Math.PI * i.toDouble() / (44100.0 / 2362)) * 0x7FFF
+            samples3[i] = sample / 1.0
+            i += 1
+        }
+
+//        // Convert String to array of frequency
+//        val PRIME_1 = 13
+//        val PRIME_2 = 23
+//        var stringToFreqArray = IntArray(text.length)
+//        for (item in text.indices) {
+//            stringToFreqArray[item] = text[item].toByte().toInt()
+//            Log.d("AADFDF", stringToFreqArray[item].toString())
+//        }
+//
+//
+//        while (i < count) {
+//            if (i/2 == 450 * durationS) {
+//                samples[i] = 0.0
+//                samples[i + 1] = 900000.0
+//            } else {
+//                samples[i] = 0.0
+//                samples[i+1] = 0.0
+//            }
+//            i += 2
+//        }
+//        val fftDo = DoubleFFT_1D(count)
+        val buffer = ShortArray(count)
+        val inverseBuffer = DoubleArray(count)
+//
 //        fftDo.realForward(samples)
+//        fftDo.realForward(samples2)
+//        for (i in 0..(count-1)) {
+//            inverseBuffer[i] = (samples[i] + samples2[i])/2
+//        }
 //        Log.d("AAAA", samples[901].toString())
 //        var max = 0.0
 //        var maxIndex = -1
-//        for (i in 0..(44100-1)) {
+//        for (i in 0..(count-1)) {
 //            if (abs(samples[i]) > max) {
 //                max = samples[i]
 //                maxIndex = i
@@ -70,10 +102,13 @@ class MainActivity : Activity() {
 //        }
 //        Log.d("AAAA", max.toString() + " " + maxIndex.toString())
 
-        fftDo.realInverse(samples, true)
-        Log.d("AAAA", Arrays.toString(samples))
-        for (i in 0..(44100-1)) {
-            buffer[i] = samples[i].toShort()
+//        fftDo.realInverse(inverseBuffer, true)
+//        Log.d("AAAA", Arrays.toString(samples))
+        for (i in 0..(count-1)) {
+            inverseBuffer[i]= (samples[i] + samples2[i] + samples3[i]) / 3
+        }
+        for (i in 0..(count-1)) {
+            buffer[i] = inverseBuffer[i].toShort()
         }
 
         val player = AudioTrack.Builder()
