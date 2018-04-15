@@ -5,17 +5,11 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.media.audiofx.LoudnessEnhancer
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.widget.Toast
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.math.abs
 
 
 class MainActivity : Activity() {

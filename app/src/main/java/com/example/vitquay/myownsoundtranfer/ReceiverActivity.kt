@@ -23,9 +23,6 @@ class ReceiverActivity: Activity() {
     var fftThread: Thread? = null
     var fftArray: DoubleArray? = null
     var handler: Handler = Handler(Looper.getMainLooper())
-    var monitorFreq: Int = 0
-    var peakArrayList: ArrayList<Int> = ArrayList()
-    var characterCount: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,13 +51,19 @@ class ReceiverActivity: Activity() {
         fftThread = object : Thread() {
             override fun run() {
                 while (true) {
+                    if (Thread.currentThread().isInterrupted) {
+                        return
+                    }
                     shortArrayToDoubleArray(fftArray!!, soundSampler!!.buffer)
                     doubleFFT_1D.realForward(fftArray)
-                    informListener(fftArray!!)
                     handler.post{
                         calculatePeak(500, 6000, 21)
                     }
-                    sleep(30)
+                    try {
+                        sleep(30)
+                    } catch (e: InterruptedException) {
+                        return
+                    }
                 }
             }
         }
@@ -90,9 +93,6 @@ class ReceiverActivity: Activity() {
 
         var i = 0
         var arrayCounter = 0
-        var pseudoHash: Float = 0f
-
-        var temp: String = ""
 
         while (i < peakCount && arrayCounter < values.size) {
             if (values[arrayCounter].magnitude > 15) {
@@ -102,13 +102,12 @@ class ReceiverActivity: Activity() {
                     charArray[pair.coeff1] = pair.coeff2
                 }
                 i++
-                pseudoHash = values[arrayCounter].frequency.toFloat()
             }
             arrayCounter++
         }
 
-        var sum: Int = 0
-        var average: Float = 0f
+        var sum = 0
+        var average = 0f
         for ( i in 0 until charArray.size) {
             if (i != charArray.size - 1) {
                 if (charArray[i] < 32 || charArray[i] > 126) return
@@ -126,11 +125,11 @@ class ReceiverActivity: Activity() {
                     secondCharArray[i] = charArray[i].toChar()
                 }
                 var decodedString = String(secondCharArray)
-                if (!decodedString.equals(prevDecodedString)) {
+                if (decodedString != prevDecodedString) {
                     peakTextView.text = peakTextView.text.toString() + decodedString
                     lastTimeStringDecoded = System.currentTimeMillis()
                     prevDecodedString = decodedString
-                } else if (System.currentTimeMillis() - lastTimeStringDecoded > 2000) {
+                } else if (System.currentTimeMillis() - lastTimeStringDecoded > 1000) {
                     peakTextView.text = peakTextView.text.toString() + decodedString
                     lastTimeStringDecoded = System.currentTimeMillis()
                     prevDecodedString = decodedString
@@ -158,14 +157,10 @@ class ReceiverActivity: Activity() {
             println("Size mismatch")
             return
         } else {
-            for (i in 0..shortArray.size - 1) {
+            for (i in 0 until shortArray.size) {
                 doubleArray[i] = shortArray[i].toDouble()
             }
         }
-    }
-
-    fun informListener(doubleArray: DoubleArray) {
-
     }
 
     private fun setupPermission() {
@@ -205,8 +200,13 @@ class ReceiverActivity: Activity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         fftThread!!.interrupt()
-        soundSampler!!.stop()
+
+        try {
+            soundSampler!!.stop()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Sound Sample stop() Failed", Toast.LENGTH_LONG).show()
+        }
+        super.onDestroy()
     }
 }
