@@ -7,49 +7,12 @@
     android:weightSum="12">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:text="Monitor Frequency" />
-
-    <EditText
-        android:id="@+id/addFreqEditText"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:ems="10"
-        android:inputType="textPersonName" />
-
-    <Button
-        android:id="@+id/addMonitorFreqButton"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="Monitor" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:text="Value" />
-
-    <TextView
-        android:id="@+id/freqMonitorTextView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical" />
-
-    <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:text="Peak Frequency" />
+        android:text="Decoded String" />
 
     <TextView
         android:id="@+id/peakTextView"
@@ -57,4 +20,12 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center_vertical" />
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Reset" />
+
 </LinearLayout>
