@@ -4,47 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="10">
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:text="Sampling Rate" />
-
-    <EditText
-        android:id="@+id/samplingRateEditText"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:ems="10"
-        android:inputType="textPersonName"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="16dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:text="Buffer Size" />
-
-    <EditText
-        android:id="@+id/bufferSizeEditText"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:ems="10"
-        android:inputType="textPersonName" />
-
-    <Button
-        android:id="@+id/updateButton"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="Update" />
+    android:weightSum="12">
 
     <TextView
         android:layout_width="match_parent"
@@ -78,6 +38,21 @@
 
     <TextView
         android:id="@+id/freqMonitorTextView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:text="Peak Frequency" />
+
+    <TextView
+        android:id="@+id/peakTextView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

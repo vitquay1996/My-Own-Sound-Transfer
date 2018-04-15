@@ -21,6 +21,7 @@ class ReceiverActivity: Activity() {
     var fftArray: DoubleArray? = null
     var handler: Handler = Handler(Looper.getMainLooper())
     var monitorFreq: Int = 0
+    var peakArrayList: ArrayList<Int> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,50 +30,60 @@ class ReceiverActivity: Activity() {
 
         setupPermission()
 
-        updateButton.setOnClickListener {
-            if(soundSampler == null) {
-                soundSampler = SoundSampler(samplingRateEditText.text.toString().toInt(),
-                        bufferSizeEditText.text.toString().toInt())
-                try {
-                    soundSampler!!.init()
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Sound Sample Init() Failed", Toast.LENGTH_LONG).show()
-                    return@setOnClickListener
-                }
-                Toast.makeText(this, "Sound Sampler Recording", Toast.LENGTH_LONG).show()
+        soundSampler = SoundSampler(44100, 44100)
+        try {
+            soundSampler!!.init()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Sound Sample Init() Failed", Toast.LENGTH_LONG).show()
+        }
 
-                fftArray = DoubleArray(soundSampler!!.bufferSize)
+        fftArray = DoubleArray(soundSampler!!.bufferSize)
 
-                val doubleFFT_1D = DoubleFFT_1D(soundSampler!!.bufferSize)
+        val doubleFFT_1D = DoubleFFT_1D(soundSampler!!.bufferSize)
 
-                fftThread = object : Thread() {
-                    override fun run() {
-                        while (true) {
-                            shortArrayToDoubleArray(fftArray!!, soundSampler!!.buffer)
-                            doubleFFT_1D.realForward(fftArray)
-                            informListener(fftArray!!)
-                            handler.post{
-                                freqMonitorTextView.text = (Math.log((Math.sqrt(Math.pow(fftArray!![2 * monitorFreq], 2.0) + Math.pow(fftArray!![2 * monitorFreq + 1], 2.0)) ))).toString()
-                            }
-                            sleep(16)
-                        }
+        fftThread = object : Thread() {
+            override fun run() {
+                while (true) {
+                    shortArrayToDoubleArray(fftArray!!, soundSampler!!.buffer)
+                    doubleFFT_1D.realForward(fftArray)
+                    informListener(fftArray!!)
+                    handler.post{
+                        calculatePeak(2000, 2400, 3)
                     }
+                    sleep(16)
                 }
-                fftThread!!.start()
-            } else {
-                fftThread!!.interrupt()
-                soundSampler!!.stop()
-                soundSampler = null
             }
         }
+        fftThread!!.start()
 
         addMonitorFreqButton.setOnClickListener {
-            try {
-                monitorFreq = addFreqEditText.text.toString().toInt()
-            } catch (e: Exception) {
-                Toast.makeText(this, "Error converting string to int", Toast.LENGTH_LONG).show();
-            }
+//            try {
+//                monitorFreq = addFreqEditText.text.toString().toInt()
+//            } catch (e: Exception) {
+//                Toast.makeText(this, "Error converting string to int", Toast.LENGTH_LONG).show();
+//            }
         }
+    }
+
+    private fun calculatePeak(startFreq: Int, endFreq: Int, peakCount: Int) {
+
+            var tempString = ""
+            var values = ArrayList<Pair>()
+
+            for (i in startFreq .. endFreq) {
+                values.add(Pair(i, Math.log((Math.sqrt(Math.pow(fftArray!![2 * i], 2.0) + Math.pow(fftArray!![2 * i + 1], 2.0)) ))))
+            }
+
+            values.sortDescending()
+
+            for (i in 0 until peakCount) {
+                tempString += values[i].frequency.toString() + " "
+            }
+
+        handler.post{
+            peakTextView.text = tempString
+        }
+
     }
 
     fun shortArrayToDoubleArray(doubleArray: DoubleArray, shortArray: ShortArray) {
@@ -108,6 +119,16 @@ class ReceiverActivity: Activity() {
         if (requestCode == 1) {
             if (grantResults!!.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Audio recording permission denied by user", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    class Pair(var frequency: Int, var magnitude: Double) : Comparable<Pair> {
+        override fun compareTo(other: Pair): Int {
+            return when {
+                this.magnitude > other.magnitude -> 1
+                this.magnitude < other.magnitude -> -1
+                else -> 0
             }
         }
     }
