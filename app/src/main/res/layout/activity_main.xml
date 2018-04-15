@@ -8,11 +8,29 @@
     tools:context="com.example.vitquay.myownsoundtranfer.MainActivity">
 
 
+    <EditText
+        android:id="@+id/text_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Type a sentence" />
+
+    <TextView
+        android:id="@+id/num_char_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
+    <Button
+        android:id="@+id/set_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Set String" />
+
     <Button
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="Emit Sound" />
 
     <Button
         android:id="@+id/receiverButton"
