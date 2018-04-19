@@ -51,14 +51,20 @@ class ReceiverActivity: Activity() {
         fftThread = object : Thread() {
             override fun run() {
                 while (true) {
+
+                    /* Interrupt handler so that no resources is leaked*/
                     if (Thread.currentThread().isInterrupted) {
                         return
                     }
+
                     shortArrayToDoubleArray(fftArray!!, soundSampler!!.buffer)
+
                     doubleFFT_1D.realForward(fftArray)
+
                     handler.post{
                         calculatePeak(500, 6000, 21)
                     }
+
                     try {
                         sleep(30)
                     } catch (e: InterruptedException) {
@@ -73,24 +79,19 @@ class ReceiverActivity: Activity() {
     private fun calculatePeak(startFreq: Int, endFreq: Int, peakCount: Int) {
         var values = ArrayList<Pair>()
 
+        /* Calculates magnitudes of FFT-ed array*/
         for (i in startFreq .. endFreq) {
             var magnitude = Math.log((Math.sqrt(Math.pow(fftArray!![2 * i], 2.0) + Math.pow(fftArray!![2 * i + 1], 2.0)) ))
             values.add(Pair(i, magnitude))
         }
 
+        /* Sorts the magnitudes */
         values.sortDescending()
 
-        var charArray = IntArray(peakCount)
+        var intCharArray = IntArray(peakCount)
         lateinit var pair:IntegerPair
-//        for (i in 0 until peakCount) {
-//            if (values[i].magnitude >15) {
-//                pair = calculatePrimeCoefficients(13, 23, values[i].frequency)
-//                if (pair.coeff1 < charArray.size) charArray[pair.coeff1] = pair.coeff2.toChar()
-//            } else {
-//                i--
-//            }
-//        }
 
+        /* Decodes the frequencies of highest peaks */
         var i = 0
         var arrayCounter = 0
 
@@ -98,33 +99,37 @@ class ReceiverActivity: Activity() {
             if (values[arrayCounter].magnitude > 15) {
                 pair = calculatePrimeCoefficients(83, 23, values[arrayCounter].frequency)
                 //println("A peak at " + values[arrayCounter].frequency.toString())
-                if (pair.coeff1 < charArray.size) {
-                    charArray[pair.coeff1] = pair.coeff2
+                if (pair.coeff1 < intCharArray.size) {
+                    intCharArray[pair.coeff1] = pair.coeff2
                 }
                 i++
             }
             arrayCounter++
         }
+        /*---------------------------------------------*/
 
+        /* Calculates the average */
         var sum = 0
         var average = 0f
-        for ( i in 0 until charArray.size) {
-            if (i != charArray.size - 1) {
-                if (charArray[i] < 32 || charArray[i] > 126) return
-                sum += charArray[i];
+        for ( i in 0 until intCharArray.size) {
+            if (i != intCharArray.size - 1) {
+                if (intCharArray[i] < 32 || intCharArray[i] > 126) return // weird characters are filtered out
+                sum += intCharArray[i]
             }
-            if (i == charArray.size - 1) {
-                average = charArray[i].toFloat()
+            if (i == intCharArray.size - 1) {
+                average = intCharArray[i].toFloat()
             }
         }
+        /*-----------------------*/
 
-        if (average - (sum / (charArray.size - 1).toFloat()) < 0.001 && average != 0f) {
+        /* Compares average with checksum, update string if necessary */
+        if (average - (sum / (intCharArray.size - 1).toFloat()) < 0.001 && average != 0f) {
             handler.post {
-                var secondCharArray  = CharArray(peakCount - 1)
-                for ( i in 0 until secondCharArray.size) {
-                    secondCharArray[i] = charArray[i].toChar()
+                var charArray  = CharArray(peakCount - 1)
+                for ( i in 0 until charArray.size) {
+                    charArray[i] = intCharArray[i].toChar()
                 }
-                var decodedString = String(secondCharArray)
+                var decodedString = String(charArray)
                 if (decodedString != prevDecodedString) {
                     peakTextView.text = peakTextView.text.toString() + decodedString
                     lastTimeStringDecoded = System.currentTimeMillis()
@@ -136,9 +141,12 @@ class ReceiverActivity: Activity() {
                 }
             }
         }
-
+        /*----------------------------------------------------------------*/
     }
 
+    /**
+     * Returns the coefficients of 2 primes from a given frequency
+     */
     private fun calculatePrimeCoefficients(prime1: Int, prime2: Int, number: Int): ReceiverActivity.IntegerPair {
         var i = 0
 
@@ -152,6 +160,9 @@ class ReceiverActivity: Activity() {
         return IntegerPair(0, 0)
     }
 
+    /**
+     * Helper function, short array -> double array
+     */
     fun shortArrayToDoubleArray(doubleArray: DoubleArray, shortArray: ShortArray) {
         if (shortArray.size != doubleArray.size) {
             println("Size mismatch")
@@ -200,6 +211,7 @@ class ReceiverActivity: Activity() {
     }
 
     override fun onDestroy() {
+        /* Prevents resources leak */
         fftThread!!.interrupt()
 
         try {
